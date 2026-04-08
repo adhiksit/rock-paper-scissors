@@ -8,26 +8,25 @@ function App() {
   const [computerChoice, setComputerChoice] = useState("");
   const [result, setResult] = useState("");
   const [score, setScore] = useState({ user: 0, computer: 0 });
-
+  const [streak, setStreak] = useState(0);
   const [history, setHistory] = useState([]);
 
-  const getComputerChoice = () => {
-    const randomIndex = Math.floor(Math.random() * choices.length);
-    return choices[randomIndex];
-  };
+  const getComputerChoice = () =>
+    choices[Math.floor(Math.random() * choices.length)];
 
   const determineWinner = (user, computer) => {
     if (user === computer) return "Draw";
-
     if (
       (user === "rock" && computer === "scissors") ||
       (user === "paper" && computer === "rock") ||
       (user === "scissors" && computer === "paper")
     ) {
       setScore((prev) => ({ ...prev, user: prev.user + 1 }));
+      setStreak((prev) => prev + 1);
       return "You Win 🎉";
     } else {
       setScore((prev) => ({ ...prev, computer: prev.computer + 1 }));
+      setStreak(0);
       return "Computer Wins 🤖";
     }
   };
@@ -35,20 +34,22 @@ function App() {
   const handleClick = (choice) => {
     const compChoice = getComputerChoice();
     const gameResult = determineWinner(choice, compChoice);
-
     setUserChoice(choice);
     setComputerChoice(compChoice);
     setResult(gameResult);
-
-    // ✅ NEW: save move to history
     setHistory((prev) => [
+      { user: choice, computer: compChoice, result: gameResult },
       ...prev,
-      {
-        user: choice,
-        computer: compChoice,
-        result: gameResult,
-      },
     ]);
+  };
+
+  const handleReset = () => {
+    setUserChoice("");
+    setComputerChoice("");
+    setResult("");
+    setScore({ user: 0, computer: 0 });
+    setStreak(0);
+    setHistory([]);
   };
 
   return (
@@ -74,7 +75,15 @@ function App() {
         <p>Computer: {score.computer}</p>
       </div>
 
-      {/* ✅ NEW: History Section */}
+      <div className="streak">
+        Win Streak: <strong>{streak}</strong>
+        {streak >= 3 && " 🔥"}
+      </div>
+
+      <button className="reset-btn" onClick={handleReset}>
+        Reset Game
+      </button>
+
       <div className="history">
         <h2>Previous Moves</h2>
         {history.length === 0 ? (
